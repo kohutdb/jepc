@@ -1,6 +1,9 @@
 # jepc
 
 Fully featured JSON-RPC handler for JavaScript/Node.js.
+If you need a server, try [sepc](https://github.com/kohutd/sepc).
+If you need a client, try [repc](https://github.com/kohutd/repc).
+If you need details, read [JSON-RPC 2.0 Specification](https://www.jsonrpc.org/specification).
 
 ## Installation
 
