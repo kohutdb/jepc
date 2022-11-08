@@ -120,7 +120,7 @@ const sum = new SumMethod();
 const { handle } = jepc({ sum });
 ```
 
-Errors:
+Producing errors:
 
 ```javascript
 import jepc, { JsonRpcError } from 'jepc';
@@ -134,6 +134,26 @@ function divide(a, b) {
 }
 
 jepc({ divide });
+```
+
+Handling errors:
+
+```javascript
+import jepc, { JsonRpcError } from 'jepc';
+
+const add = () => {
+    throw new Error('Unsupported!');
+}
+
+const { setErrorHandler } = jepc({ divide });
+
+setErrorHandler((error, context, defaultErrorHandler) => {
+    console.error(error);
+
+    return defaultErrorHandler(error, context);
+});
+
+jepcServer.listen(3000);
 ```
 
 ## API
@@ -161,3 +181,9 @@ handle([{ "jsonrpc": "2.0", "method": "add", "params": [4, 4], "id": 2 }]) // ok
 Available methods.
 
 - type: `Record<string, function>`
+
+### `setErrorHandler`
+
+Set error handler.
+
+- type: `function(function(error, context, defaultErrorHandler))`

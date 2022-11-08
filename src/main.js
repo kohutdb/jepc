@@ -65,6 +65,34 @@ function jepc(methods = {}) {
         }
     });
 
+    const defaultErrorHandler = (error, context) => {
+        const { id } = context.request.id;
+
+        if (!id) {
+            return '';
+        }
+
+        if (error instanceof JsonRpcError) {
+            return makeError(id, {
+                code: error.code,
+                message: error.message,
+                data: error.data,
+            });
+        } else {
+            console.log(error);
+
+            return makeError(id, {
+                code: -32603,
+                message: 'Internal error',
+            });
+        }
+    }
+    let errorHandler = defaultErrorHandler;
+
+    function setErrorHandler(handler) {
+        errorHandler = handler;
+    }
+
     async function handleSingle(request, context = {}) {
         // { "jsonrpc": "2.0", "method": "...", "params": [], "id": 1 }
         if (!request || typeof request !== 'object') {
@@ -133,24 +161,7 @@ function jepc(methods = {}) {
 
             return madeResult;
         } catch (e) {
-            if (!id) {
-                return '';
-            }
-
-            if (e instanceof JsonRpcError) {
-                return makeError(id, {
-                    code: e.code,
-                    message: e.message,
-                    data: e.data,
-                });
-            } else {
-                console.log(e);
-
-                return makeError(id, {
-                    code: -32603,
-                    message: 'Internal error',
-                });
-            }
+            return errorHandler(e, context, defaultErrorHandler);
         }
     }
 
@@ -197,7 +208,7 @@ function jepc(methods = {}) {
         }
     }
 
-    return { methods, handle };
+    return { methods, handle, setErrorHandler };
 }
 
 export default jepc;
