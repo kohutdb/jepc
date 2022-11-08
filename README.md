@@ -100,7 +100,7 @@ function sum() {
 Method class:
 
 ```javascript
-import jepc from 'jepc';
+import jepc, { Method } from 'jepc';
 
 class SumMethod extends Method {
     handle(params) {
@@ -118,6 +118,22 @@ class ReturnId extends Method {
 const sum = new SumMethod();
 
 const { handle } = jepc({ sum });
+```
+
+Errors:
+
+```javascript
+import jepc, { JsonRpcError } from 'jepc';
+
+function divide(a, b) {
+    if (b === 0) {
+        throw new JsonRpcError(-32602, 'Cannot divide by zero');
+    }
+
+    return a / b;
+}
+
+jepc({ divide });
 ```
 
 ## API
