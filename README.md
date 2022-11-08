@@ -59,6 +59,67 @@ app.post('/', (req, res) => {
 });
 ```
 
+Accessing params:
+
+```javascript
+// natural (like general js function) 
+function add(a, b) {
+    return a + b;
+}
+
+// using destruction
+function createUser({ name, email }) {
+    const user = { /* handle user creation */ };
+
+    return user;
+}
+
+// using this.params
+function createUser() {
+    const { name, email } = this.params;
+
+    const user = { /* handle user creation */ };
+
+    return user;
+}
+
+// using ...
+function sort(...numbers) {
+    return numbers.sort();
+}
+
+// using "arguments"
+// parameter names must be empty here
+function sum() {
+    const numbers = arguments[0];
+
+    return Object.values(numbers).reduce((s, c) => s + c, 0);
+}
+```
+
+Method class:
+
+```javascript
+import jepc from 'jepc';
+
+class SumMethod extends Method {
+    handle(params) {
+        return Object.values(params)
+            .reduce((s, c) => s + c, 0);
+    }
+}
+
+class ReturnId extends Method {
+    handle(params, context) {
+        return context.request.id;
+    }
+}
+
+const sum = new SumMethod();
+
+const { handle } = jepc({ sum });
+```
+
 ## API
 
 ### `handle`

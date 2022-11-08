@@ -8,20 +8,34 @@ export class JsonRpcError {
     }
 }
 
-function createMethodHandler(fn) {
-    const names = getParameterNames(fn);
+export class Method {
+    handle(params) {
+    }
+}
 
-    return (params) => {
-        if (names[0] && (names[0].startsWith('{') || names[0].startsWith('['))) {
-            return fn(params);
+class FnMethod extends Method {
+    constructor(fn) {
+        super();
+
+        this.fn = fn;
+        this.parameterNames = getParameterNames(fn);
+    }
+
+    handle(params, context) {
+        const thisContext = { params, context };
+
+        const names = this.parameterNames;
+
+        if (!names.length || names[0].startsWith('{') || names[0].startsWith('[')) {
+            return this.fn.call(thisContext, params);
         }
 
-        if (!Array.isArray(params)) {
+        if (!Array.isArray(params) && !names[0].startsWith('...')) {
             params = names.map((name) => params[name]);
         }
 
-        return fn(...params);
-    };
+        return this.fn.call(thisContext, ...params);
+    }
 }
 
 function makeError(id, error) {
@@ -44,10 +58,14 @@ function jepc(methods = {}) {
     methods = { ...methods };
 
     Object.entries(methods).forEach(([name, fn]) => {
-        methods[name] = createMethodHandler(fn);
+        if (fn instanceof Method) {
+            methods[name] = fn;
+        } else {
+            methods[name] = new FnMethod(fn);
+        }
     });
 
-    async function handleSingle(request) {
+    async function handleSingle(request, context = {}) {
         // { "jsonrpc": "2.0", "method": "...", "params": [], "id": 1 }
         if (!request || typeof request !== 'object') {
             return makeError(null, {
@@ -56,7 +74,11 @@ function jepc(methods = {}) {
             });
         }
 
-        let { jsonrpc, method, params = [], id = null } = request;
+        let { jsonrpc, method, params, id = null } = request;
+
+        if (params == null) {
+            params = [];
+        }
 
         // 2.0
         if (jsonrpc !== '2.0') {
@@ -98,7 +120,10 @@ function jepc(methods = {}) {
         }
 
         try {
-            const result = await methods[method](params);
+            const result = await methods[method].handle(params, {
+                ...context,
+                request,
+            });
 
             const madeResult = makeResult(id, result);
 
@@ -119,6 +144,8 @@ function jepc(methods = {}) {
                     data: e.data,
                 });
             } else {
+                console.log(e);
+
                 return makeError(id, {
                     code: -32603,
                     message: 'Internal error',
@@ -127,7 +154,7 @@ function jepc(methods = {}) {
         }
     }
 
-    async function handle(message) {
+    async function handle(message, context = {}) {
         let request;
 
         if (typeof message === 'string') {
@@ -153,14 +180,14 @@ function jepc(methods = {}) {
                 });
             }
 
-            output = (await Promise.all(request.map((request) => handleSingle(request))))
+            output = (await Promise.all(request.map((request) => handleSingle(request, context))))
                 .filter((v) => !!v);
 
             if (!output.length) {
                 return undefined;
             }
         } else {
-            output = await handleSingle(request);
+            output = await handleSingle(request, context);
         }
 
         if (output) {
