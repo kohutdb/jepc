@@ -139,7 +139,7 @@ jepc({ divide });
 Handling errors:
 
 ```javascript
-import jepc, { JsonRpcError } from 'jepc';
+import jepc from 'jepc';
 
 const add = () => {
     throw new Error('Unsupported!');
@@ -152,8 +152,6 @@ setErrorHandler((error, context, defaultErrorHandler) => {
 
     return defaultErrorHandler(error, context);
 });
-
-jepcServer.listen(3000);
 ```
 
 ## API
