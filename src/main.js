@@ -66,7 +66,7 @@ function jepc(methods = {}) {
     });
 
     const defaultErrorHandler = (error, context) => {
-        const { id } = context.request.id;
+        const { id } = context.request;
 
         if (!id) {
             return '';
@@ -101,6 +101,8 @@ function jepc(methods = {}) {
                 message: 'Invalid Request',
             });
         }
+
+        context.request = request;
 
         let { jsonrpc, method, params, id = null } = request;
 
