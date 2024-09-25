@@ -1,0 +1,29 @@
+{
+  "name": "jepc",
+  "version": "1.0.3",
+  "description": "JSON-RPC handler.",
+  "main": "src/main.js",
+  "type": "module",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kohutd/jepc.git"
+  },
+  "keywords": [
+    "json",
+    "rpc",
+    "jsonrpc",
+    "jepc"
+  ],
+  "author": "Davyd Kohut (davyd.kohut@gmail.com)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kohutd/jepc/issues"
+  },
+  "homepage": "https://github.com/kohutd/jepc#readme",
+  "dependencies": {
+    "get-parameter-names": "^0.3.0"
+  }
+}
